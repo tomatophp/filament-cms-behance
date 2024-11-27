@@ -2,63 +2,55 @@
 
 namespace TomatoPHP\FilamentCmsBehance\Services;
 
-use Filament\Notifications\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Str;
-use TomatoPHP\FilamentCmsBehance\Browser\Actions\CreateBrowser;
-use TomatoPHP\FilamentCmsBehance\Browser\Chrome;
-use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use TomatoPHP\FilamentCms\Events\PostCreated;
 use TomatoPHP\FilamentCms\Models\Post;
+use TomatoPHP\FilamentCmsBehance\Browser\Actions\CreateBrowser;
+use TomatoPHP\FilamentCmsBehance\Browser\Chrome;
 
 class Behance
 {
-    /**
-     * @var Chrome|null
-     */
-    private Chrome|null $dusk;
-
+    private ?Chrome $dusk;
 
     public function __construct(
-        private ?string $username=null,
-        private ?string $url=null,
-        public ?int $userId=null,
-        public ?string $userType=null,
-        public ?string $panel=null,
-        private ?string $type='web',
-    )
-    {
+        private ?string $username = null,
+        private ?string $url = null,
+        public ?int $userId = null,
+        public ?string $userType = null,
+        public ?string $panel = null,
+        private ?string $type = 'web',
+    ) {
         $browser = new CreateBrowser($this->type);
         $this->dusk = $browser->dusk();
     }
 
     /**
-     * @return void
      * @throws \Throwable
      */
     public function run(): void
     {
         $data = [
-            "userType" => $this->userType,
-            "userId" => $this->userId,
-            "username" => $this->username,
-            "url" => $this->url,
+            'userType' => $this->userType,
+            'userId' => $this->userId,
+            'username' => $this->username,
+            'url' => $this->url,
         ];
-        $this->dusk->browse(function (Browser $browser) use ($data){
+        $this->dusk->browse(function (Browser $browser) use ($data) {
             try {
                 $projectsList = [];
                 $user = $data['userType']::find($data['userId']);
-                if($data['username']){
+                if ($data['username']) {
                     $browser->visit('https://www.behance.net/' . $data['username']);
                     $browser->pause(2000);
                     $count = 1200;
-                    for($i=0;$i<6; $i++){
-                        $browser->script('window.scrollTo(0, '.$count.');');
+                    for ($i = 0; $i < 6; $i++) {
+                        $browser->script('window.scrollTo(0, ' . $count . ');');
                         $browser->pause(2000);
-                        $count+=1200;
+                        $count += 1200;
                     }
                     $browser->pause(2000);
 
@@ -78,12 +70,12 @@ class Behance
                         return projectListArray;
                     ")[0];
                 }
-                if(count($projectsList)){
+                if (count($projectsList)) {
                     try {
-                        foreach($projectsList as $project){
-                            $this->getProjectByURL($browser,$project['url'], $data);
+                        foreach ($projectsList as $project) {
+                            $this->getProjectByURL($browser, $project['url'], $data);
                         }
-                    }catch (\Exception $e) {
+                    } catch (\Exception $e) {
                         Log::error($e);
 
                         Notification::make()
@@ -92,11 +84,10 @@ class Behance
                             ->error()
                             ->sendToDatabase($user);
                     }
-                }
-                else {
+                } else {
                     try {
-                        $this->getProjectByURL($browser,$data['url'], $data);
-                    }catch (\Exception $e) {
+                        $this->getProjectByURL($browser, $data['url'], $data);
+                    } catch (\Exception $e) {
                         Log::error($e);
 
                         Notification::make()
@@ -114,7 +105,7 @@ class Behance
                     ->success()
                     ->sendToDatabase($user);
 
-            }catch (\Exception $e){
+            } catch (\Exception $e) {
                 Log::error($e);
 
                 Notification::make()
@@ -127,11 +118,11 @@ class Behance
 
     }
 
-    private function getProjectByURL(Browser $browser,string $url, array $data=[])
+    private function getProjectByURL(Browser $browser, string $url, array $data = [])
     {
         try {
             $browser->visit($url);
-            $browser->waitFor("#project-canvas");
+            $browser->waitFor('#project-canvas');
             $projectImages = $browser->script("
                             let projectBody = document.querySelectorAll('#project-canvas')[0];
                             let images = [];
@@ -192,8 +183,8 @@ class Behance
 
                     ")[0];
 
-            $project['images'] = $projectImages['images']??[];
-            $project['texts'] = $projectImages['texts']??[];
+            $project['images'] = $projectImages['images'] ?? [];
+            $project['texts'] = $projectImages['texts'] ?? [];
             $project['keywords'] = $projectImages['keywords'];
             $project['description'] = $projectImages['description'];
             $project['name'] = $projectImages['title'];
@@ -202,40 +193,38 @@ class Behance
             $project['comments'] = $projectImages['comments'];
             $project['cover'] = $projectImages['cover'];
 
-
             $getSlug = Str::of($this->url)->remove('https://www.behance.net/gallery/')->replace('/', '-')->toString();
             $checkIfPostExists = Post::query()->withTrashed()->where('slug', $getSlug)->first();
-            if($checkIfPostExists){
-                if($checkIfPostExists->deleted_at){
+            if ($checkIfPostExists) {
+                if ($checkIfPostExists->deleted_at) {
                     $checkIfPostExists->restore();
                 }
                 $checkIfPostExists->clearMediaCollection('feature_image');
                 $post = $checkIfPostExists;
-            }
-            else {
-                $post = new Post();
+            } else {
+                $post = new Post;
             }
 
             $post->title = [
-                "en"=> $project['name'],
-                "ar"=> $project['name'],
+                'en' => $project['name'],
+                'ar' => $project['name'],
             ];
-            $post->views = (int)$project['views'];
+            $post->views = (int) $project['views'];
             $post->keywords = [
-                "ar" => $project['keywords'],
-                "en" => $project['keywords']
+                'ar' => $project['keywords'],
+                'en' => $project['keywords'],
             ];
             $post->short_description = [
-                "ar" => $project['description'],
-                "en" => $project['description'],
+                'ar' => $project['description'],
+                'en' => $project['description'],
             ];
-            $body = "";
-            foreach($project['texts'] as $text){
+            $body = '';
+            foreach ($project['texts'] as $text) {
                 $body .= $text;
             }
             $post->body = [
-                "ar"=> $body,
-                "en"=> $body
+                'ar' => $body,
+                'en' => $body,
             ];
             $post->is_published = true;
             $post->published_at = now();
@@ -250,15 +239,14 @@ class Behance
             $post->meta('views', $project['views']);
 
             $post->addMediaFromUrl($project['cover'])->toMediaCollection('feature_image');
-            foreach($project['images'] as $image){
+            foreach ($project['images'] as $image) {
                 $post->addMediaFromUrl($image)->toMediaCollection('images');
             }
 
             Event::dispatch(new PostCreated($post->toArray()));
 
-
             $browser->pause(2000);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             Log::error($e);
         }
     }

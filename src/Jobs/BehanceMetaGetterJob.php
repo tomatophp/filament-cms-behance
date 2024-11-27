@@ -3,7 +3,6 @@
 namespace TomatoPHP\FilamentCmsBehance\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -11,19 +10,21 @@ use Illuminate\Queue\SerializesModels;
 
 class BehanceMetaGetterJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
      */
     public function __construct(
-        public ?string $username=null,
-        public ?string $url=null,
-        public ?int $userId=null,
-        public ?string $userType=null,
-        public ?string $panel=null,
-    )
-    {
+        public ?string $username = null,
+        public ?string $url = null,
+        public ?int $userId = null,
+        public ?string $userType = null,
+        public ?string $panel = null,
+    ) {
         //
     }
 
@@ -32,7 +33,7 @@ class BehanceMetaGetterJob implements ShouldQueue
      */
     public function handle(): void
     {
-        if($this->username || $this->url){
+        if ($this->username || $this->url) {
             $be = new \TomatoPHP\FilamentCms\Services\Behance(
                 username: $this->username,
                 url: $this->url,

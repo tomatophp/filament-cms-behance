@@ -1,19 +1,16 @@
 <?php
+
 namespace TomatoPHP\FilamentCmsBehance\Browser;
 
 use Closure;
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Illuminate\Support\Collection;
 use Laravel\Dusk\Chrome\SupportsChrome;
-use Facebook\WebDriver\WebDriverPlatform;
 use Laravel\Dusk\Concerns\ProvidesBrowser;
-use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\Remote\DesiredCapabilities;
-use Facebook\WebDriver\Remote\WebDriverBrowserType;
-use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 
 /**
- *
  * @property RemoteWebDriver $getDriver
  * @property Collection $arguments
  * @property int $requestTimeout
@@ -40,45 +37,31 @@ use Facebook\WebDriver\Remote\WebDriverCapabilityType;
  * @property static remote()
  * @property static headless()
  * @property static setConnectTimeout(int $timeout)
+ *
  * @method  browse(Closure $callback): Browser
  * @method close()
  */
 class Chrome
 {
-    use ProvidesBrowser,
-        SupportsChrome;
+    use ProvidesBrowser;
+    use SupportsChrome;
 
-
-    /**
-     * @var RemoteWebDriver
-     */
     public RemoteWebDriver $getDriver;
-
 
     /**
      * A list of remote web driver arguments.
-     *
-     * @var Collection
      */
     protected Collection $arguments;
 
-
     /**
      * Set the maximum time of a request to remote WebDriver server.
-     *
-     * @var int
      */
     protected int $requestTimeout = 50000;
 
     /**
      * Set the maximum time of a connection to remote WebDriver server.
-     *
-     * @var int
      */
     protected int $connectTimeout = 50000;
-
-
-
 
     /**
      * Initialises the dusk browser and starts the chrome driver.
@@ -92,8 +75,7 @@ class Chrome
          * @var string
          */
         protected string $callerName
-    )
-    {
+    ) {
         $this->arguments = Collection::make();
     }
 
@@ -109,11 +91,11 @@ class Chrome
         return $this;
     }
 
-
     /**
      * Stop Browser
      *
      * @return $this
+     *
      * @throws \Exception
      */
     public function stop(): static
@@ -163,7 +145,6 @@ class Chrome
         return $this->addArgument('--headless');
     }
 
-
     /**
      * Set Remote Port
      *
@@ -209,7 +190,7 @@ class Chrome
      *
      * @return $this
      */
-    public function noZygote():static
+    public function noZygote(): static
     {
         return $this->noSandbox()->addArgument('--no-zygote');
     }
@@ -219,7 +200,7 @@ class Chrome
      *
      * @return $this
      */
-    public function ignoreSslErrors():static
+    public function ignoreSslErrors(): static
     {
         return $this->addArgument('--ignore-certificate-errors');
     }
@@ -227,9 +208,8 @@ class Chrome
     /**
      * Set the initial browser window size.
      *
-     * @param int $width the browser width in pixels
-     * @param int $height the browser height in pixels
-     *
+     * @param  int  $width  the browser width in pixels
+     * @param  int  $height  the browser height in pixels
      * @return $this
      */
     public function windowSize(int $width, int $height): static
@@ -240,8 +220,7 @@ class Chrome
     /**
      * Set the user proxy IP.
      *
-     * @param string $ip the user proxy IP
-     *
+     * @param  string  $ip  the user proxy IP
      * @return $this
      */
     public function proxyServer(string $ip): static
@@ -252,7 +231,6 @@ class Chrome
     /**
      * Set user Agent for selected browser.
      *
-     * @param string $useragent
      * @return $this
      */
     public function userAgent(string $useragent): static
@@ -290,20 +268,17 @@ class Chrome
         return $this->addArgument('disable-infobars');
     }
 
-
     /**
      * Set The Browser Data Base Path
      *
-     * @param string $path
      * @return $this
      */
-    public function browserData(string $path):static
+    public function browserData(string $path): static
     {
         return $this->addArgument('--user-data-dir=' . $path);
     }
 
     /**
-     * @param string $id
      * @return $this
      */
     public function setProfile(string $id): static
@@ -314,12 +289,11 @@ class Chrome
     /**
      * Add a browser option.
      *
-     * @param string $argument
      * @return $this
      */
     protected function addArgument(string $argument): static
     {
-        if (!$this->arguments->contains($argument)) {
+        if (! $this->arguments->contains($argument)) {
             $this->arguments->push($argument);
         }
 
@@ -328,15 +302,13 @@ class Chrome
 
     /**
      * Create the RemoteWebDriver instance.
-     *
-     * @return RemoteWebDriver
      */
     public function driver(): RemoteWebDriver
     {
-        $options = (new ChromeOptions())->addArguments($this->arguments->toArray());
+        $options = (new ChromeOptions)->addArguments($this->arguments->toArray());
         $options->setExperimentalOption('excludeSwitches', ['enable-automation']);
 
-        $this->getDriver =  RemoteWebDriver::create(
+        $this->getDriver = RemoteWebDriver::create(
             'http://localhost:9515',
             DesiredCapabilities::chrome()->setCapability(
                 ChromeOptions::CAPABILITY,
@@ -351,8 +323,6 @@ class Chrome
 
     /**
      * Get the browser caller name.
-     *
-     * @return string
      */
     protected function getCallerName(): string
     {

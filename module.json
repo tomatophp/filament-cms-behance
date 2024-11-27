@@ -1,0 +1,29 @@
+{
+    "name": "FilamentCmsBehance",
+    "alias": "filament-cms-behance",
+    "description": {
+        "ar": "Behance Extension for Filament CMS Builder to import data from Behance",
+        "en": "Behance Extension for Filament CMS Builder to import data from Behance",
+        "gr": "Behance Extension for Filament CMS Builder to import data from Behance",
+        "sp": "Behance Extension for Filament CMS Builder to import data from Behance"
+    },
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "TomatoPHP\\FilamentCmsBehance\\FilamentCmsBehanceServiceProvider"
+    ],
+    "files": [],
+    "title": {
+        "ar": "Filament cms behance",
+        "en": "Filament cms behance",
+        "gr": "Filament cms behance",
+        "sp": "Filament cms behance"
+    },
+    "color": "#cc1448",
+    "icon": "heroicon-c-users",
+    "placeholder": "https://raw.githubusercontent.com/tomatophp/filament-cms-behance/master/art/screenshot.jpg",
+    "type": "plugin",
+    "version": "v1.0.0",
+    "github" : "https://github.com/tomatophp/filament-cms-behance",
+    "docs" : "https://github.com/tomatophp/filament-cms-behance"
+}
